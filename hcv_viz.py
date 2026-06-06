@@ -80,10 +80,6 @@ def build_heatmap_figure(value_pivot: pd.DataFrame,
     value_pivot = value_pivot.reindex(constructs)
     status_pivot = status_pivot.reindex(constructs)
 
-    if psv_genotype:
-        psvs = sorted(psvs, key=lambda p: (psv_genotype.get(p, "zzz"), p))
-        value_pivot = value_pivot[psvs]
-        status_pivot = status_pivot[psvs]
     x_labels = psvs
     y_labels = [_wrap(c, width=80) for c in constructs]
 

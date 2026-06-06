@@ -259,6 +259,22 @@ if view_mode == "Single heatmap":
     subgroup = st.sidebar.selectbox("Construct subgroup",
                                     ["All constructs"] + info["subgroups_present"])
 
+with st.sidebar.expander("Sort"):
+    sort_by = st.radio(
+        "Sort rows by",
+        ["Breadth", "Mean value"],
+        index=0,
+        help="Breadth = fraction of tested PSVs neutralized · "
+             "Mean value = average % neut or log₁₀(IC50) across tested PSVs")
+    sort_order = st.radio(
+        "Order",
+        ["Descending", "Ascending"],
+        index=0,
+        help="Descending = highest on top · Ascending = lowest on top")
+
+sort_descending = (sort_order == "Descending")
+sort_by_key = "breadth" if sort_by == "Breadth" else "mean_value"
+
 with st.sidebar.expander("More filters"):
     exps = st.multiselect("Experiment", info["experiments"], default=info["experiments"])
     grps = st.multiselect("Group", info["groups"], default=info["groups"])
@@ -299,7 +315,8 @@ with st.expander("📋 Data summary & diagnostics"):
 # ============================================================
 if view_mode == "Single heatmap":
     value_pivot, status_pivot, counts = H.build_pivots(
-        f, view, bucket=bucket, metric=metric, mode=mode, threshold=threshold, ge=ge)
+        f, view, bucket=bucket, metric=metric, mode=mode, threshold=threshold, ge=ge,
+        sort_by=sort_by_key, sort_descending=sort_descending, psv_genotype=psv_geno)
 
     if metric == "pct_neut":
         _dil_lbl = f"% neut @ 1:{int(dilution)}"
@@ -344,7 +361,9 @@ else:
         fsg = f[f["Subgroup"] == sg] if sg != "All constructs" else f
         vsub = H.compute_view(fsg, metric=metric, dilution=dilution)
         vp, sp, cnt = H.build_pivots(vsub, bucket=bucket, metric=metric,
-                                     mode=mode, threshold=threshold, ge=ge)
+                                     mode=mode, threshold=threshold, ge=ge,
+                                     sort_by=sort_by_key, sort_descending=sort_descending,
+                                     psv_genotype=psv_geno)
         if vp.empty:
             continue
         with st.expander(f"{sg}  ·  {len(vp)} constructs × {len(vp.columns)} PSVs",

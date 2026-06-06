@@ -32,7 +32,7 @@ import pandas as pd
 # CONSTANTS  (same as V15/V16)
 # ============================================================
 
-HCV_EXPERIMENTS = {"PVXE141", "PVXE142", "PVXE167A", "PVXE167B", "PVXE174", "PVXE181"}
+HCV_EXPERIMENTS = {"PVXE141", "PVXE142", "PVXE167A", "PVXE167B", "PVXE174", "PVXE181", "PVXE184"}
 DROP_GROUPS = {"GNG", "G1"}
 DROP_SAMPLE_TYPES = {"antibody", "ab", "mab", "plasma"}
 
@@ -120,6 +120,9 @@ _add("PVXE181", "270", 70,  "Boost2")
 _add("PVXE181", "273", 70,  "Boost2")
 _add("PVXE181", "271", 70,  "Boost2")
 _add("PVXE181", "272", 49,  "Boost2")
+
+# ------ PVXE184 ------
+_add("PVXE184", "279", 64, "Boost2")
 
 # ------ PVXE174 ------
 _add("PVXE174", "257", 28,  "Prime")
@@ -792,11 +795,20 @@ def cell_status(value: float, tested: bool, all_nn: bool,
     return "hit"
 
 
-def build_pivots(df_filtered_or_view, view=None, bucket=None, metric='log10_ic50', mode='none', threshold=None, ge=None):
+def build_pivots(df_filtered_or_view, view=None, bucket=None, metric='log10_ic50',
+                 mode='none', threshold=None, ge=None,
+                 sort_by="breadth", sort_descending=True, psv_genotype=None):
+    """Build pivot tables for heatmap visualization from the compute_view output.
+
+    sort_by:         "breadth"    = fraction of tested PSVs neutralized per construct
+                     "mean_value" = average % neut or log10(IC50) across tested PSVs
+    sort_descending: True  = highest value on top (default)
+                     False = lowest value on top
+    Columns are always sorted by genotype then breadth (descending within genotype).
+    """
     # Support both build_pivots(f, view, ...) and build_pivots(view, ...)
     if view is None:
         view = df_filtered_or_view
-    """Build pivot tables for heatmap visualization from the compute_view output."""
     ge = ge if ge is not None else True
     threshold = threshold or 0.0
 
@@ -827,6 +839,46 @@ def build_pivots(df_filtered_or_view, view=None, bucket=None, metric='log10_ic50
     cols = value_pivot.columns.union(status_pivot.columns)
     value_pivot = value_pivot.reindex(index=idx, columns=cols)
     status_pivot = status_pivot.reindex(index=idx, columns=cols).fillna('not_tested')
+
+    # ── Row sorting ────────────────────────────────────────────────────────────
+    tested_statuses = {"hit", "miss", "nn"}
+
+    def _row_breadth(construct):
+        row = status_pivot.loc[construct]
+        tested = sum(1 for s in row if s in tested_statuses)
+        positive = sum(1 for s in row if s in {"hit", "miss"})
+        return positive / tested if tested else 0
+
+    def _row_mean(construct):
+        row = value_pivot.loc[construct]
+        vals = [val for val in row if pd.notna(val)]
+        return float(np.mean(vals)) if vals else 0.0
+
+    key_fn = _row_breadth if sort_by == "breadth" else _row_mean
+
+    # Note: viz layer does [::-1] before rendering, so we invert the direction
+    # here to get the intended visual order on screen:
+    #   sort_descending=True  → highest on top → sort ascending (reverse=False) here
+    #   sort_descending=False → lowest on top  → sort descending (reverse=True) here
+    ordered_rows = sorted(value_pivot.index, key=key_fn, reverse=not sort_descending)
+    value_pivot = value_pivot.reindex(ordered_rows)
+    status_pivot = status_pivot.reindex(ordered_rows)
+
+    # ── Column sorting (genotype then breadth, fixed) ──────────────────────────
+    def _col_breadth(psv):
+        col = status_pivot[psv]
+        tested = sum(1 for s in col if s in tested_statuses)
+        positive = sum(1 for s in col if s in {"hit", "miss"})
+        return positive / tested if tested else 0
+
+    geno = psv_genotype or {}
+    ordered_cols = sorted(
+        value_pivot.columns,
+        key=lambda p: (geno.get(p, "zzz"), -_col_breadth(p))
+    )
+
+    value_pivot = value_pivot[ordered_cols]
+    status_pivot = status_pivot[ordered_cols]
 
     return value_pivot, status_pivot, counts
 
