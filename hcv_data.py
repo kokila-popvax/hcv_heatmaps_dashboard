@@ -32,11 +32,11 @@ import pandas as pd
 # CONSTANTS  (same as V15/V16)
 # ============================================================
 
-HCV_EXPERIMENTS = {"PVXE141", "PVXE142", "PVXE167A", "PVXE167B", "PVXE174", "PVXE181", "PVXE184"}
+HCV_EXPERIMENTS = {"PVXE141", "PVXE142", "PVXE167A", "PVXE167B", "PVXE174", "PVXE181", "PVXE184", "PVXE185", "PVXE187", "PVXE188"}
 DROP_GROUPS = {"GNG", "G1"}
 DROP_SAMPLE_TYPES = {"antibody", "ab", "mab", "plasma"}
 
-UNCATEGORIZED = "10. Uncategorized"
+UNCATEGORIZED = "9. Uncategorized"
 BUCKETS = ["Prime", "Boost1", "Boost2"]
 
 
@@ -108,6 +108,12 @@ _add("PVXE167B", "246", 98,  "Boost2")
 _add("PVXE167B", "250", 91,  "Boost2")
 _add("PVXE167B", "254", 98,  "Boost2")
 
+# ------ PVXE174 ------
+_add("PVXE174", "257", 28,  "Prime")
+_add("PVXE174", "260", 28,  "Prime")
+_add("PVXE174", "254", 56,  "Boost1")
+_add("PVXE174", "257", 140, "Boost2")
+
 # ------ PVXE181 ------
 _add("PVXE181", "258", 21,  "Prime")
 _add("PVXE181", "262", 21,  "Prime")
@@ -122,13 +128,35 @@ _add("PVXE181", "271", 70,  "Boost2")
 _add("PVXE181", "272", 49,  "Boost2")
 
 # ------ PVXE184 ------
-_add("PVXE184", "279", 64, "Boost2")
 
-# ------ PVXE174 ------
-_add("PVXE174", "257", 28,  "Prime")
-_add("PVXE174", "260", 28,  "Prime")
-_add("PVXE174", "254", 56,  "Boost1")
-_add("PVXE174", "257", 140, "Boost2")
+_add("PVXE184", "276", 42, "Boost1")
+_add("PVXE184", "277", 42, "Boost1")
+_add("PVXE184", "279", 64, "Boost2")
+_add("PVXE184", "280", 64, "Boost2")
+_add("PVXE184", "281", 71, "Boost2")
+_add("PVXE184", "282", 71, "Boost2")
+
+# ------ PVXE185 ------
+
+_add("PVXE185", "283", 42, "Boost1")
+_add("PVXE185", "284", 42, "Boost1")
+_add("PVXE185", "285", 42, "Boost1")
+_add("PVXE185", "286", 42, "Boost1")
+_add("PVXE185", "289", 70, "Boost2")
+_add("PVXE185", "290", 70, "Boost2")
+_add("PVXE185", "291", 70, "Boost2")
+_add("PVXE185", "292", 70, "Boost2")
+
+# ------ PVXE187 ------
+
+_add("PVXE187", "293", 42, "Boost1")
+_add("PVXE187", "294", 42, "Boost1")
+_add("PVXE187", "295", 42, "Boost1")
+_add("PVXE187", "296", 42, "Boost1")
+_add("PVXE187", "297", 70, "Boost2")
+_add("PVXE187", "298", 70, "Boost2")
+_add("PVXE187", "299", 70, "Boost2")
+_add("PVXE187", "300", 70, "Boost2")
 
 # ============================================================
 # CUSTOM CONSTRUCT LABELS FOR PVXE181 G2, G5, G6
@@ -222,59 +250,8 @@ _EXACT_MAP_RAW = {
     "H77C_sE1.LZ.ferritin||E2.LZ.ferritin_Gaussia_furinP2A_FibAlpha": SG2,
     "H77C_sE1.LZ||sE2.LZ.ferritin_Gaussia_furinP2A_FibAlpha":      SG2,
     "H77_sE1_LIF_sE2":                                              SG2,
-    "1a154 (H77_w7) E1_TMD||E2 _TMD IVT construct":                 SG6,
-    "1a154 E1_TMD||E2_TMD IVT construct":                           SG6,
-    "1a154_E1E2_TMD_IVT":                                            SG6,
-    "UKNP3.1.2 E1_TMD||E2 _TMD IVT construct":                      SG6,
-    "UKNP3.1.2 E1_TMD||E2_TMD IVT construct":                       SG6,
-    "UKNP3.1.2_E1E2_TMD_IVT":                                       SG6,
-    "UKNP1.11.6 E1_TMD||E2 _TMD IVT construct":                     SG6,
-    "UKNP1.11.6 E1_TMD||E2_TMD IVT construct":                      SG6,
-    "UKNP1.11.6_E1E2_TMD_IVT":                                      SG6,
-    "1b58 E1_TMD||E2 _TMD IVT construct":                           SG6,
-    "1b58 E1_TMD||E2_TMD IVT construct":                            SG6,
-    "1b58_E1E2_TMD_IVT":                                             SG6,
-    "UKNP1.18.1 E1_TMD||E2 _TMD IVT construct":                     SG6,
-    "UKNP1.18.1 E1_TMD||E2_TMD IVT construct":                      SG6,
-    "UKNP1.18.1_E1E2_TMD_IVT":                                      SG6,
-    "1b34 E1_TMD||E2 _TMD IVT construct":                           SG6,
-    "1b34 E1_TMD||E2_TMD IVT construct":                            SG6,
-    "1b34_E1E2_TMD_IVT":                                             SG6,
-    "1a72 E1_TMD||E2 _TMD IVT construct":                            SG6,
-    "1a72 E1_TMD||E2_TMD IVT construct":                             SG6,
-    "1a72_E1E2_TMD_IVT":                                             SG6,
-    "UKNP1.10.1_E1E2_TMD_IVT":                                      SG6,
-    "UKNP1.9.1_E1E2_TMD_IVT":                                       SG6,
-    "1a123_E1E2_TMD_IVT":                                            SG6,
-    "UKNP1.16.3 E1_TMD||E2 _TMD IVT construct":                     SG6,
-    "UKNP1.16.3 E1_TMD||E2_TMD IVT construct":                      SG6,
-    "UKNP1.16.3_E1E2_TMD_IVT":                                      SG6,
-    "1b25 E1_TMD||E2 _TMD IVT construct":                            SG6,
-    "1b25 E1_TMD||E2_TMD IVT construct":                             SG6,
-    "1b25_E1E2_TMD_IVT":                                             SG6,
-    "UKNP4.2.2 E1_TMD||E2 _TMD IVT construct":                      SG6,
-    "UKNP4.2.2 E1_TMD||E2_TMD IVT construct":                       SG6,
-    "UKNP4.2.2_E1E2_TMD_IVT":                                       SG6,
-    "UKNP5.2.1 E1_TMD||E2 _TMD IVT construct":                      SG6,
-    "UKNP5.2.1 E1_TMD||E2_TMD IVT construct":                       SG6,
-    "UKNP5.2.1_E1E2_TMD_IVT":                                       SG6,
-    "1a138_E1E2_TMD_IVT":                                            SG6,
-    # Bare strain names (appear in IC50 sheet without "E1_TMD||E2_TMD" suffix)
-    "UKNP3.1.2":   SG2,
-    "UKNP1.18.1":  SG2,
-    "UKNP4.2.2":   SG2,
-    "1b58":        SG2,
-    "1a72":        SG2,
-    "UKNP1.16.3":  SG2,
-    "UKNP1.10.1":  SG2,
-    "UKNP1.9.1":   SG2,
-    "1a123":       SG2,
-    "1a154":       SG2,
-    "1a138":       SG2,
-    "1b34":        SG2,
-    "UKNP5.2.1":   SG2,
-    "UKNP1.11.6":  SG2,
-    "1b25":        SG2,
+    "Drew's glycosylated H77 sE2 on Ferritin":           SG2,
+    "Mansun's no HVR no stalk H77 sE2 on Ferritin":      SG2,
 
     # 3. De novo Designed Constructs
     "4n0y_C1_372_dldesign_0_cycle1_af2pred_6_strict_gaussia_ferritin IGH526": SG3,
@@ -295,20 +272,20 @@ _EXACT_MAP_RAW = {
     "PopVax's E2 scaffolded on HPF":                     SG3,
 
     # 4. Multi-Component Prime-Boost — new labels use \n between rounds (not |)
-    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72":                                          SG4,  # G2 Prime
-    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154": SG4,  # G2 Boost1
-    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154\n+ 1a138 + 1b34 + UKNP5.2.1 + UKNP1.11.6 + 1b25": SG4,  # G2 Boost2
-    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=1 ILP":               SG4,  # G5 Prime
-    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=1 ILP\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154 + HVR HPF Reactivity=1 ILP": SG4,  # G5 Boost1
-    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=1 ILP\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154 + HVR HPF Reactivity=1 ILP\n+ 1a138 + 1b34 + UKNP5.2.1 + UKNP1.11.6 + 1b25 + HVR HPF Reactivity=1 ILP": SG4,  # G5 Boost2
-    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=3 ILP":               SG4,  # G6 Prime
-    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=3 ILP\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154 + HVR HPF Reactivity=3 ILP": SG4,  # G6 Boost1
-    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=3 ILP\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154 + HVR HPF Reactivity=3 ILP\n+ 1a138 + 1b34 + UKNP5.2.1 + UKNP1.11.6 + 1b25 + HVR HPF Reactivity=3 ILP": SG4,  # G6 Boost2
+    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72":                                          SG4,
+    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154": SG4,
+    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154\n+ 1a138 + 1b34 + UKNP5.2.1 + UKNP1.11.6 + 1b25": SG4,
+    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=1 ILP":               SG4,
+    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=1 ILP\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154 + HVR HPF Reactivity=1 ILP": SG4,
+    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=1 ILP\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154 + HVR HPF Reactivity=1 ILP\n+ 1a138 + 1b34 + UKNP5.2.1 + UKNP1.11.6 + 1b25 + HVR HPF Reactivity=1 ILP": SG4,
+    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=3 ILP":               SG4,
+    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=3 ILP\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154 + HVR HPF Reactivity=3 ILP": SG4,
+    "UKNP3.1.2 + UKNP1.18.1 + UKNP4.2.2 + 1b58 + 1a72 + HVR HPF Reactivity=3 ILP\n+ UKNP1.16.3 + UKNP1.10.1 + UKNP1.9.1 + 1a123 + 1a154 + HVR HPF Reactivity=3 ILP\n+ 1a138 + 1b34 + UKNP5.2.1 + UKNP1.11.6 + 1b25 + HVR HPF Reactivity=3 ILP": SG4,
 
     # 5. HVR Immunogens
     "HVR HPF Reactivity=1 ILP":                          SG5,
-    "HVR HPF Reactivty=3 ILP mixture":                   SG5,   # note typo "Reactivty"
-    "HVR HPF Reactivity=3 ILP":                          SG5,   # alternate spelling
+    "HVR HPF Reactivty=3 ILP mixture":                   SG5,
+    "HVR HPF Reactivity=3 ILP":                          SG5,
     "HVR_wILP1_HPF":                                     SG5,
     "HVR_wILP3_HPF LNPmix":                              SG5,
     "HVR Most reactive five No ferritin":                SG5,
@@ -329,13 +306,66 @@ _EXACT_MAP_RAW = {
     "H77mbE1E2_native_codon optimized + HVR_wILP3_HPF (a and b)":       SG5,
 
     # 6. E1/E2 TMD Variants
+    "1a154 (H77_w7) E1_TMD||E2 _TMD IVT construct":      SG6,
+    "UKNP3.1.2 E1_TMD||E2 _TMD IVT construct":           SG6,
+    "UKNP1.11.6 E1_TMD||E2 _TMD IVT construct":          SG6,
+    "1b58 E1_TMD||E2 _TMD IVT construct":                SG6,
+    "UKNP1.18.1 E1_TMD||E2 _TMD IVT construct":          SG6,
+    "1b34 E1_TMD||E2 _TMD IVT construct":                SG6,
+    "1a72 E1_TMD||E2 _TMD IVT construct":                SG6,
+    "UKNP1.10.1_E1E2_TMD_IVT":                           SG6,
+    "UKNP1.9.1_E1E2_TMD_IVT":                            SG6,
+    "1a123_E1E2_TMD_IVT":                                SG6,
+    "UKNP1.16.3 E1_TMD||E2 _TMD IVT construct":          SG6,
+    "1b25 E1_TMD||E2 _TMD IVT construct":                SG6,
+    "UKNP4.2.2 E1_TMD||E2 _TMD IVT construct":           SG6,
+    "UKNP5.2.1 E1_TMD||E2 _TMD IVT construct":           SG6,
+    "1a138_E1E2_TMD_IVT":                                SG6,
     "H77mbE2_Codon optimized":                           SG6,
     "H77_sE2-HATMD_Codon Optimized":                     SG6,
     "H77mbE1E2_native_codon optimized":                  SG6,
     "H77_sE1_HATMD-sE2_HATMD_codon optimized":           SG6,
     "H77mbE1E2_native_FYQ442NYT_codon optimized":        SG6,
-    "Drew's glycosylated H77 sE2 on Ferritin":           SG6,
-    "Mansun's no HVR no stalk H77 sE2 on Ferritin":      SG6,
+    
+    # E1_TMD||E2_TMD variants with different spacing
+    "1a154 E1_TMD||E2_TMD IVT construct":                SG6,
+    "1a154_E1E2_TMD_IVT":                                SG6,
+    "UKNP3.1.2 E1_TMD||E2_TMD IVT construct":            SG6,
+    "UKNP3.1.2_E1E2_TMD_IVT":                            SG6,
+    "UKNP1.11.6 E1_TMD||E2_TMD IVT construct":           SG6,
+    "UKNP1.11.6_E1E2_TMD_IVT":                           SG6,
+    "1b58 E1_TMD||E2_TMD IVT construct":                 SG6,
+    "1b58_E1E2_TMD_IVT":                                 SG6,
+    "UKNP1.18.1 E1_TMD||E2_TMD IVT construct":           SG6,
+    "UKNP1.18.1_E1E2_TMD_IVT":                           SG6,
+    "1b34 E1_TMD||E2_TMD IVT construct":                 SG6,
+    "1b34_E1E2_TMD_IVT":                                 SG6,
+    "1a72 E1_TMD||E2_TMD IVT construct":                 SG6,
+    "1a72_E1E2_TMD_IVT":                                 SG6,
+    "UKNP1.16.3 E1_TMD||E2_TMD IVT construct":           SG6,
+    "UKNP1.16.3_E1E2_TMD_IVT":                           SG6,
+    "1b25 E1_TMD||E2_TMD IVT construct":                 SG6,
+    "1b25_E1E2_TMD_IVT":                                 SG6,
+    "UKNP4.2.2 E1_TMD||E2_TMD IVT construct":            SG6,
+    "UKNP4.2.2_E1E2_TMD_IVT":                            SG6,
+    "UKNP5.2.1 E1_TMD||E2_TMD IVT construct":            SG6,
+    "UKNP5.2.1_E1E2_TMD_IVT":                            SG6,
+    # Bare strain names (appear in IC50 sheet without E1_TMD||E2_TMD suffix)
+    "UKNP3.1.2":   SG6,
+    "UKNP1.18.1":  SG6,
+    "UKNP4.2.2":   SG6,
+    "1b58":        SG6,
+    "1a72":        SG6,
+    "UKNP1.16.3":  SG6,
+    "UKNP1.10.1":  SG6,
+    "UKNP1.9.1":   SG6,
+    "1a123":       SG6,
+    "1a154":       SG6,
+    "1a138":       SG6,
+    "1b34":        SG6,
+    "UKNP5.2.1":   SG6,
+    "UKNP1.11.6":  SG6,
+    "1b25":        SG6,
 
     # 7. Complex HVR Arrays + Adjuvants
     "HVRs_wILP3max_21aa_HPF_G4Ssep":                     SG7,

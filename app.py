@@ -122,6 +122,42 @@ def sidebar_data_source() -> tuple[pd.DataFrame | None, pd.DataFrame | None]:
     return df_ic50, df_const
 
 
+# PSVs shown in the "Top 4 per subgroup" summary view
+TOP4_PSVS = ["1a154", "1b34", "IH_1b58_PVX_PL2058", "1a72"]
+TOP4_N = 4   # constructs per subgroup
+
+
+def top4_filter(tidy_df: pd.DataFrame, view_df: pd.DataFrame,
+                subgroups: list[str], n: int = TOP4_N) -> pd.DataFrame:
+    """Return a filtered tidy df containing only the top-n constructs per
+    subgroup, ranked by:
+      1. Breadth — number of the 4 PSVs with a positive neutralization value
+      2. Sum of values as tiebreaker
+
+    Constructs not tested against any of the 4 PSVs are excluded.
+    The heatmap then shows actual individual values per PSV cell (not averages).
+    """
+    rows = []
+    for sg in subgroups:
+        sg_df = tidy_df[tidy_df["Subgroup"] == sg]
+        if sg_df.empty:
+            continue
+        constructs_in_sg = set(sg_df["Construct_Description"].unique())
+        scores = {}
+        for construct in constructs_in_sg:
+            cv = view_df[view_df["Construct_Description"] == construct]["value"]
+            positive = cv[cv > 0].dropna()
+            breadth = len(positive)
+            total = float(positive.sum())
+            scores[construct] = (breadth, total)
+        # Exclude constructs with no positive neutralization against any of the 4 PSVs
+        tested = {c: s for c, s in scores.items() if s[0] > 0}
+        top_constructs = sorted(tested, key=tested.get, reverse=True)[:n]
+        if top_constructs:
+            rows.append(sg_df[sg_df["Construct_Description"].isin(top_constructs)])
+    return pd.concat(rows) if rows else pd.DataFrame(columns=tidy_df.columns)
+
+
 # ============================================================
 # RENDER HELPERS
 # ============================================================
@@ -247,7 +283,8 @@ if mode == "threshold":
         threshold = float(choice.replace("≥", "").replace("%", ""))
     ge = st.sidebar.checkbox("Use ≥ (uncheck for strictly >)", value=True)
 
-view_mode = st.sidebar.radio("Layout", ["Single heatmap", "Small multiples (by subgroup)"])
+view_mode = st.sidebar.radio("Layout", ["Single heatmap", "Small multiples (by subgroup)",
+                                        "Top 4 per subgroup (summary)"])
 
 buckets_present = [b for b in H.BUCKETS if b in set(tidy["Bucket_Type"].unique())]
 bucket_opts = buckets_present + (["All (pooled)"] if buckets_present else [])
@@ -354,7 +391,7 @@ if view_mode == "Single heatmap":
 # ============================================================
 # SMALL MULTIPLES (one heatmap per subgroup, fixed bucket)
 # ============================================================
-else:
+elif view_mode == "Small multiples (by subgroup)":
     st.markdown(f"#### Subgroups — **{bucket_choice}** window")
     subs = info["subgroups_present"] or ["All constructs"]
     for sg in subs:
@@ -373,3 +410,71 @@ else:
                                          show_values=show_values)
             st.plotly_chart(fig, use_container_width=True, key=f"sm_{sg}")
             legend_caption(metric, mode)
+
+# ============================================================
+# TOP 4 PER SUBGROUP SUMMARY
+# ============================================================
+else:
+    if metric == "pct_neut":
+        _dil_lbl = f"% neut @ 1:{int(dilution)}"
+    else:
+        _dil_lbl = "log₁₀(IC50)"
+    st.markdown(
+        f"#### Top {TOP4_N} constructs per subgroup  ·  "
+        f"PSVs: {', '.join(TOP4_PSVS)}  ·  **{bucket_choice}**  ·  {_dil_lbl}"
+    )
+
+    # Match TOP4_PSVS against actual PSV names in the data (case-insensitive
+    # partial match so "1a154" matches "H77_1a154" etc.)
+    all_psvs = set(tidy["PSV"].unique())
+    matched_psvs = []
+    for target in TOP4_PSVS:
+        exact = [p for p in all_psvs if p == target]
+        if exact:
+            matched_psvs.extend(exact)
+        else:
+            partial = [p for p in all_psvs if target.lower() in p.lower()]
+            matched_psvs.extend(partial)
+    matched_psvs = list(dict.fromkeys(matched_psvs))  # deduplicate, preserve order
+
+    if not matched_psvs:
+        st.warning(
+            f"None of the summary PSVs ({', '.join(TOP4_PSVS)}) were found in the data. "
+            "Check that PSV names in your sheet match exactly.")
+    else:
+        subs = info["subgroups_present"] or []
+        # Filter tidy to only matched PSVs
+        f_top4_psvs = f[f["PSV"].isin(matched_psvs)]
+        # Compute view first so scores reflect actual metric values
+        v_top4_psvs = H.compute_view(f_top4_psvs, metric=metric, dilution=dilution)
+        # Apply bucket filter to the view before scoring
+        v_scored = v_top4_psvs.copy()
+        if bucket:
+            v_scored = v_scored[v_scored["Bucket_Type"] == bucket]
+        f_top4 = top4_filter(f_top4_psvs, v_scored, subs, n=TOP4_N)
+
+        if f_top4.empty:
+            st.info("No data found for these PSVs across the current filters.")
+        else:
+            v_top4 = H.compute_view(f_top4, metric=metric, dilution=dilution)
+            vp, sp, cnt = H.build_pivots(
+                f_top4, v_top4, bucket=bucket, metric=metric, mode=mode,
+                threshold=threshold, ge=ge,
+                sort_by=sort_by_key, sort_descending=sort_descending,
+                psv_genotype=psv_geno)
+
+            # Restrict columns to matched PSVs only (in TOP4_PSVS order)
+            col_order = [p for p in matched_psvs if p in vp.columns]
+            if col_order:
+                vp = vp[col_order]
+                sp = sp[col_order]
+
+            title = (f"Top {TOP4_N} per subgroup  ·  {bucket_choice}  ·  {_dil_lbl}"
+                     f"{'  ·  ≥' + str(threshold) if mode == 'threshold' else ''}")
+            fig = V.build_heatmap_figure(vp, sp, cnt, metric, mode, threshold,
+                                         title=title, psv_genotype=None,
+                                         show_values=show_values,
+                                         row_height=48)
+            render_heatmap_with_selection(fig, key="top4_heatmap")
+            legend_caption(metric, mode)
+            download_view(vp, sp, "top4_summary")

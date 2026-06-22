@@ -66,7 +66,9 @@ def build_heatmap_figure(value_pivot: pd.DataFrame,
                          threshold: float,
                          title: str = "",
                          psv_genotype: dict | None = None,
-                         show_values: bool = True) -> go.Figure:
+                         show_values: bool = True,
+                         row_height: int = 36,
+                         label_max_chars: int | None = None) -> go.Figure:
     """Return a clean Plotly heatmap (no breadth bar)."""
     if value_pivot.empty:
         fig = go.Figure()
@@ -81,7 +83,13 @@ def build_heatmap_figure(value_pivot: pd.DataFrame,
     status_pivot = status_pivot.reindex(constructs)
 
     x_labels = psvs
-    y_labels = [_wrap(c, width=80) for c in constructs]
+    if label_max_chars:
+        y_labels = [
+            (c[:label_max_chars] + "…") if len(c) > label_max_chars else c
+            for c in constructs
+        ]
+    else:
+        y_labels = [_wrap(c, width=80) for c in constructs]
 
     # Build z-matrix
     if mode == "threshold":
@@ -178,19 +186,22 @@ def build_heatmap_figure(value_pivot: pd.DataFrame,
                 xanchor="left", yanchor="middle",
             ))
 
+    sg_annotations = []
+
     n_rows = len(constructs)
     # Estimate left margin from the longest (possibly wrapped) y-label
-    max_label_chars = max((len(lbl.replace("<br>", " ")) for lbl in y_labels), default=40)
-    left_margin = max(120, min(max_label_chars * 5, 340))
+    effective_label_len = label_max_chars if label_max_chars else max(
+        (len(lbl.replace("<br>", " ")) for lbl in y_labels), default=40)
+    left_margin = max(120, min(effective_label_len * 7, 340))
     fig.update_layout(
         title=dict(text=title, font=dict(size=14, color="#222"),
                    y=1.0, yanchor="top", pad=dict(t=8, b=0)),
-        height=max(400, 80 + n_rows * 36),
+        height=max(400, 80 + n_rows * row_height),
         margin=dict(l=left_margin, r=200, t=200, b=20),
         plot_bgcolor="white", paper_bgcolor="white",
         font=dict(family="Helvetica, Arial, sans-serif", size=10),
         shapes=nn_shapes,
-        annotations=nn_annotations + breadth_annotations,
+        annotations=nn_annotations + breadth_annotations + sg_annotations,
     )
     fig.update_xaxes(side="top", tickangle=45, showgrid=False,
                      tickfont=dict(size=11, color="black"), automargin=True)
