@@ -406,7 +406,7 @@ elif view_mode == "Small multiples (by subgroup)":
             fig = V.build_heatmap_figure(vp, sp, cnt, metric, mode, threshold,
                                          title="", psv_genotype=psv_geno,
                                          show_values=show_values)
-            st.plotly_chart(fig, use_container_width=True, key=f"sm_{sg}")
+            st.plotly_chart(fig, use_container_width=False, key=f"sm_{sg}")
             legend_caption(metric, mode)
 
 # ============================================================
@@ -478,6 +478,6 @@ else:
                                                  title="", psv_genotype=None,
                                                  show_values=show_values,
                                                  row_height=48)
-                    st.plotly_chart(fig, use_container_width=True, key=f"top4_{sg}")
+                    st.plotly_chart(fig, use_container_width=False, key=f"top4_{sg}")
                     legend_caption(metric, mode)
                     download_view(vp, sp, f"top4_{sg}")
