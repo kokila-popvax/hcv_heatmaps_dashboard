@@ -189,14 +189,19 @@ def build_heatmap_figure(value_pivot: pd.DataFrame,
     sg_annotations = []
 
     n_rows = len(constructs)
+    n_cols = len(psvs)
     # Estimate left margin from the longest (possibly wrapped) y-label
     effective_label_len = label_max_chars if label_max_chars else max(
         (len(lbl.replace("<br>", " ")) for lbl in y_labels), default=40)
     left_margin = max(120, min(effective_label_len * 7, 340))
+    # Ensure minimum total width so y-axis labels are never squeezed off-screen
+    # Each cell ~60px, plus left margin + right margin (200) + breadth col
+    min_width = left_margin + 200 + max(n_cols * 60, 120)
     fig.update_layout(
         title=dict(text=title, font=dict(size=14, color="#222"),
                    y=1.0, yanchor="top", pad=dict(t=8, b=0)),
         height=max(400, 80 + n_rows * row_height),
+        width=min_width,
         margin=dict(l=left_margin, r=200, t=200, b=20),
         plot_bgcolor="white", paper_bgcolor="white",
         font=dict(family="Helvetica, Arial, sans-serif", size=10),

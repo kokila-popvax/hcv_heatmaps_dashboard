@@ -456,25 +456,33 @@ else:
         if f_top4.empty:
             st.info("No data found for these PSVs across the current filters.")
         else:
-            v_top4 = H.compute_view(f_top4, metric=metric, dilution=dilution)
-            vp, sp, cnt = H.build_pivots(
-                f_top4, v_top4, bucket=bucket, metric=metric, mode=mode,
-                threshold=threshold, ge=ge,
-                sort_by=sort_by_key, sort_descending=sort_descending,
-                psv_genotype=psv_geno)
+            st.markdown(f"#### Top {TOP4_N} per subgroup  ·  "
+                        f"PSVs: {', '.join(matched_psvs)}  ·  **{bucket_choice}**  ·  {_dil_lbl}")
+            for sg in subs:
+                fsg = f_top4[f_top4["Subgroup"] == sg]
+                if fsg.empty:
+                    continue
+                vsg = H.compute_view(fsg, metric=metric, dilution=dilution)
+                vp, sp, cnt = H.build_pivots(
+                    fsg, vsg, bucket=bucket, metric=metric, mode=mode,
+                    threshold=threshold, ge=ge,
+                    sort_by=sort_by_key, sort_descending=sort_descending,
+                    psv_genotype=psv_geno)
+                if vp.empty:
+                    continue
 
-            # Restrict columns to matched PSVs only (in TOP4_PSVS order)
-            col_order = [p for p in matched_psvs if p in vp.columns]
-            if col_order:
-                vp = vp[col_order]
-                sp = sp[col_order]
+                # Restrict columns to matched PSVs only (in TOP4_PSVS order)
+                col_order = [p for p in matched_psvs if p in vp.columns]
+                if col_order:
+                    vp = vp[col_order]
+                    sp = sp[col_order]
 
-            title = (f"Top {TOP4_N} per subgroup  ·  {bucket_choice}  ·  {_dil_lbl}"
-                     f"{'  ·  ≥' + str(threshold) if mode == 'threshold' else ''}")
-            fig = V.build_heatmap_figure(vp, sp, cnt, metric, mode, threshold,
-                                         title=title, psv_genotype=None,
-                                         show_values=show_values,
-                                         row_height=48)
-            render_heatmap_with_selection(fig, key="top4_heatmap")
-            legend_caption(metric, mode)
-            download_view(vp, sp, "top4_summary")
+                with st.expander(f"{sg}  ·  {len(vp)} constructs × {len(vp.columns)} PSVs",
+                                 expanded=True):
+                    fig = V.build_heatmap_figure(vp, sp, cnt, metric, mode, threshold,
+                                                 title="", psv_genotype=None,
+                                                 show_values=show_values,
+                                                 row_height=48)
+                    st.plotly_chart(fig, use_container_width=True, key=f"top4_{sg}")
+                    legend_caption(metric, mode)
+                    download_view(vp, sp, f"top4_{sg}")
