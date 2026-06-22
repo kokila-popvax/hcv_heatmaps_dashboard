@@ -150,11 +150,9 @@ def top4_filter(tidy_df: pd.DataFrame, view_df: pd.DataFrame,
             breadth = len(positive)
             total = float(positive.sum())
             scores[construct] = (breadth, total)
-        # Exclude constructs with no positive neutralization against any of the 4 PSVs
-        tested = {c: s for c, s in scores.items() if s[0] > 0}
-        top_constructs = sorted(tested, key=tested.get, reverse=True)[:n]
-        if top_constructs:
-            rows.append(sg_df[sg_df["Construct_Description"].isin(top_constructs)])
+        # Always take top N — even if all scores are 0 (all NN), still show them
+        top_constructs = sorted(scores, key=scores.get, reverse=True)[:n]
+        rows.append(sg_df[sg_df["Construct_Description"].isin(top_constructs)])
     return pd.concat(rows) if rows else pd.DataFrame(columns=tidy_df.columns)
 
 
@@ -445,13 +443,10 @@ else:
         subs = info["subgroups_present"] or []
         # Filter tidy to only matched PSVs
         f_top4_psvs = f[f["PSV"].isin(matched_psvs)]
-        # Compute view first so scores reflect actual metric values
+        # Score constructs across ALL buckets so the top-4 selection is stable
+        # regardless of which dose window the user is viewing
         v_top4_psvs = H.compute_view(f_top4_psvs, metric=metric, dilution=dilution)
-        # Apply bucket filter to the view before scoring
-        v_scored = v_top4_psvs.copy()
-        if bucket:
-            v_scored = v_scored[v_scored["Bucket_Type"] == bucket]
-        f_top4 = top4_filter(f_top4_psvs, v_scored, subs, n=TOP4_N)
+        f_top4 = top4_filter(f_top4_psvs, v_top4_psvs, subs, n=TOP4_N)
 
         if f_top4.empty:
             st.info("No data found for these PSVs across the current filters.")
@@ -469,11 +464,13 @@ else:
                 if vp.empty:
                     continue
 
-                # Restrict columns to matched PSVs only (in TOP4_PSVS order)
-                col_order = [p for p in matched_psvs if p in vp.columns]
-                if col_order:
-                    vp = vp[col_order]
-                    sp = sp[col_order]
+                # Ensure all 4 PSVs appear as columns — add missing ones as untested
+                for p in matched_psvs:
+                    if p not in vp.columns:
+                        vp[p] = float("nan")
+                        sp[p] = "not_tested"
+                vp = vp[matched_psvs]
+                sp = sp[matched_psvs]
 
                 with st.expander(f"{sg}  ·  {len(vp)} constructs × {len(vp.columns)} PSVs",
                                  expanded=True):
