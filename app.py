@@ -123,7 +123,7 @@ def sidebar_data_source() -> tuple[pd.DataFrame | None, pd.DataFrame | None]:
 
 
 # PSVs shown in the "Top 4 per subgroup" summary view
-TOP4_PSVS = ["1a154", "1b34", "IH_1b58_PVX_PL2058", "1a72"]
+TOP4_PSVS = ["IH_1a154/H77_Twist_PL2069", "IH_1b34_PVX_PL2056", "IH_1b58_PVX_PL2058", "IH_1a72_PVX_PL2014"]
 TOP4_N = 4   # constructs per subgroup
 
 
@@ -456,8 +456,6 @@ else:
         if f_top4.empty:
             st.info("No data found for these PSVs across the current filters.")
         else:
-            st.markdown(f"#### Top {TOP4_N} per subgroup  ·  "
-                        f"PSVs: {', '.join(matched_psvs)}  ·  **{bucket_choice}**  ·  {_dil_lbl}")
             for sg in subs:
                 fsg = f_top4[f_top4["Subgroup"] == sg]
                 if fsg.empty:
